@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+
+  server:
+    build:
+      context: .
+    ports:
+      - 8000:8000
+    env_file: .env_example
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:14.4-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=user_manager
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - users_manager_postgres_data:/var/lib/postgresql/data
+    expose:
+      - 5432
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  users_manager_postgres_data:
